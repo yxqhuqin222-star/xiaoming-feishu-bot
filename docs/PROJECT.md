@@ -30,6 +30,7 @@
 配置示例：
 
 - `.env.example`：本地环境变量模板，不保存真实密钥。
+- `config/com.kityhello.xiaoming.plist`：macOS LaunchAgent 常驻监听服务配置模板。
 - `config/xiaoming-broadcast.example.json`：播报配置示例。
 - `config/xiaoming-system-prompt.md`：小明运行时读取的多行系统提示词。
 
@@ -45,6 +46,7 @@
 
 - 事件监听：消费飞书 `im.message.receive_v1`。
 - 轮询兜底：定时读取指定会话的新用户消息。
+- 已处理消息 ID 会持久化到 `state/xiaoming-seen.json`；只有成功回复或明确忽略后才标记已处理，失败消息会在后续轮询中重试。
 
 群聊规则：
 

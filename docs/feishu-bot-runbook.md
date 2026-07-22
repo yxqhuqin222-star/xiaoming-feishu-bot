@@ -20,6 +20,7 @@
 当前项目已经放入可运行骨架：
 
 - `bot.js`：飞书私聊/群聊监听与 Kimi 回复。
+- `config/com.kityhello.xiaoming.plist`：macOS LaunchAgent 常驻监听服务配置模板。
 - `scripts/daily_broadcast.py`：日常播报生成与发送入口。
 - `scripts/feishu_client.py`：通过 `lark-cli` 发送飞书文本消息。
 - `scripts/learning_inventory.py`：三分钟知识卡动态库存。
@@ -65,7 +66,33 @@ REALTIME_SEARCH_TIMEOUT_MS=20000
 - API Key 使用 Kimi 开放平台生成的密钥，不要写入文档或代码。
 - `BOT_SYSTEM_PROMPT_FILE` 优先级高于 `BOT_SYSTEM_PROMPT`，用于保存多行人设和回复规则；`BOT_SYSTEM_PROMPT` 只作为备用。
 
-## 常用命令
+## 自动常驻监听
+
+当前聊天监听可以使用 macOS LaunchAgent 常驻运行，配置模板在：
+
+```text
+/Users/kityhello/workplace/geren/xiaoming/config/com.kityhello.xiaoming.plist
+```
+
+安装位置：
+
+```text
+/Users/kityhello/Library/LaunchAgents/com.kityhello.xiaoming.plist
+```
+
+日志位置：
+
+```text
+/Users/kityhello/Library/Logs/xiaoming/feishu-listener.log
+/Users/kityhello/Library/Logs/xiaoming/feishu-listener-error.log
+```
+
+常用检查：
+
+```bash
+launchctl print gui/$(id -u)/com.kityhello.xiaoming
+ps aux | rg -i "node .*bot\\.js|lark-cli event consume"
+```
 
 ## 自动定时播报
 
@@ -89,6 +116,8 @@ REALTIME_SEARCH_TIMEOUT_MS=20000
 ```
 
 旧的 `com.kityhello.jump-broadcast` 已停用，后续日常播报统一发到飞书。
+
+## 常用命令
 
 ```bash
 npm run check
@@ -155,9 +184,10 @@ node bot.js --reply-text '帮我查一下 OpenAI 最新新闻'
 
 轮询兜底规则：
 
-- 启动时先标记已有消息为已读。
-- 只处理启动后的新用户消息。
-- 不自动回复启动前的历史消息。
+- 首次启动且没有历史状态文件时，会把最近消息标记为已读，避免对旧消息批量补发。
+- 后续已处理消息 ID 持久化到 `state/xiaoming-seen.json`。
+- 只有成功回复或明确忽略未 @ 消息后，才标记为已处理。
+- 如果生成或发送回复失败，该消息不会永久标记为已处理，后续轮询会继续重试。
 
 可配置项：
 
