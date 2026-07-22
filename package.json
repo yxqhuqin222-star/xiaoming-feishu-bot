@@ -1,0 +1,18 @@
+{
+  "name": "xiaoming-feishu-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node bot.js",
+    "check": "node bot.js --check",
+    "reply-latest": "node bot.js --reply-latest",
+    "broadcast": "python3 scripts/daily_broadcast.py",
+    "broadcast:due": "python3 scripts/daily_broadcast.py due --config config/xiaoming-broadcast.example.json",
+    "test": "python3 -m unittest discover -s tests",
+    "test:realtime": "node bot.js --self-test && node bot.js --reply-text '今天北京的天气如何，会下雨吗' && node bot.js --reply-text '现在几点，今天星期几' && node bot.js --reply-text '帮我查一下 OpenAI 最新新闻'"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
